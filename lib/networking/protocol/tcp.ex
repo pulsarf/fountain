@@ -19,7 +19,11 @@ defmodule Networking.Protocol.Tcp do
   @doc """
   forward packets from client to socket and vice versa
   """
-  def pipe({socket, proxy}, client) do
+  def pipe(%Proxy.Connection.Context{
+    client_socket: client,
+    server_socket: socket,
+    logging_proxy: proxy
+  } = context) do
     Logger.info "Piping the socket from client to server"
 
     tasks = [
@@ -28,6 +32,8 @@ defmodule Networking.Protocol.Tcp do
     ]
 
     Utilities.Concurrent.race_tasks(tasks)
+
+    context
   end
 
   defp destroy_sockets(sockets) do

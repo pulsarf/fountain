@@ -1,6 +1,6 @@
 defmodule Proxy.Connection.Handler do
   def handle_client(client) do
-    context = %Context{client_socket: client}
+    context = %Proxy.Connection.Context{client_socket: client}
 
     context
       |> authenticate()
@@ -10,21 +10,22 @@ defmodule Proxy.Connection.Handler do
   end
 
   defp authenticate(context) do
-    Proxy.Auth.authenticate(context)
+    Proxy.Connection.Authentication.authenticate(context)
   end
 
-  defp delegate({:error, :abort} = error, _), do: error
-  defp delegate({:ok, auth}, client) do
-    Proxy.Tunnel.delegate(auth, client)
+  defp delegate(context) do
+    Proxy.Tunnel.delegate(context)
   end
 
-  defp start_connection({:ok, tunnel}, client) do
-    Proxy.Tunnel.Connection.start(tunnel, client)
+  defp start_connection(context) do
+    Proxy.Tunnel.Connection.start(context)
   end
-  defp start_connection({:error, _}, _), do: {:error, :abort}
 
-  defp start_pipe({:ok, {socket, logging_proxy}}, client) do
-    Networking.Protocol.Tcp.pipe({socket, logging_proxy}, client)
+  defp start_pipe(context) do
+    Networking.Protocol.Tcp.pipe(context)
   end
-  defp start_pipe({:error, _}, _), do: {:error, :abort}
+
+  defp start_connection(error, _), do: error
+  defp delegate(error, _), do: error
+  defp start_pipe(error, _), do: error
 end

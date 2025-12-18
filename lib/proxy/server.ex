@@ -20,7 +20,7 @@ defmodule Proxy.Server do
   def handle_info(:accept, %{socket: socket} = state) do
     {:ok, client} = :gen_tcp.accept(socket)
 
-    Proxy.Flow.handle_client(client)
+    Proxy.Connection.Handler.handle_client(client)
 
     send(self(), :accept)
 

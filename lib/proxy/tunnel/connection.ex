@@ -3,14 +3,16 @@ defmodule Proxy.Tunnel.Connection do
 
   import Bitwise
 
-  def start({destination_type, ip_buffer, port}, client) do
+  def start(%Proxy.Connection.Context{
+    ip_address_data: {destination_type, ip_buffer, port}
+  } = context) do
     ip = Networking.Protocol.IP.format_ip(ip_buffer)
 
     socket = create_end_socket(ip, port)
 
     logging_proxy = &tunnel_proxy/2
 
-    {:ok, {socket, logging_proxy}}
+    %{context | server_socket: socket, logging_proxy: logging_proxy}
   end
 
   defp tunnel_proxy(type, packet) do

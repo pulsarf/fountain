@@ -5,30 +5,32 @@ defmodule Proxy.Connection.Authentication do
 
   require Logger
 
-  def authenticate({client_socket} = context) do
-    case client |> Networking.Protocol.Tcp.read_packet() do
+  def authenticate(%Proxy.Connection.Context{
+    client_socket: client_socket
+  } = context) do
+    case client_socket |> Networking.Protocol.Tcp.read_packet() do
       {:ok, packet} ->
         Logger.info "Got client side auth request"
 
-        client |> Networking.Protocol.Tcp.write_packet(<<5, 0>>)
+        client_socket |> Networking.Protocol.Tcp.write_packet(<<5, 0>>)
 
-        {:ok, identify_connection(client)}
+        identify_connection(context)
       {:error, reason} ->
-        destroy_client(client)
+        destroy_client(client_socket)
         {:error, :abort}
     end
   end
 
-  defp identify_connection(client) do
-    case client |> Networking.Protocol.Tcp.read_packet() do
+  defp identify_connection(%Proxy.Connection.Context{client_socket: client_socket} = context) do
+    case client_socket |> Networking.Protocol.Tcp.read_packet() do
       {:ok, packet} ->
-        {:ok, data} = parse_ip_data_from(packet, client)
+        {:ok, data} = parse_ip_data_from(packet, client_socket)
 
         Logger.info "Creating tunnel for the client"
 
-        {:ok, data}
+        %{context | ip_address_data: data}
       {:error, reason} ->
-        destroy_client(client)
+        destroy_client(client_socket)
         {:error, reason}
     end
   end

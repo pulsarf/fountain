@@ -1,10 +1,13 @@
 defmodule Proxy.Tunnel do
   require Logger
 
-  def delegate({:ok, {destination_type, ip_buffer, port}}, client) do
-    accept_client(client, {destination_type, ip_buffer, port})
+  def delegate(%Proxy.Connection.Context{
+    client_socket: client_socket,
+    ip_address_data: {destination_type, ip_buffer, port}
+  } = context) do
+    accept_client(client_socket, {destination_type, ip_buffer, port})
 
-    {:ok, {destination_type, ip_buffer, port}}
+    context
   end
 
   defp accept_client(client, {destination_type, ip_buffer, port}) do
