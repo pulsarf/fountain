@@ -12,7 +12,7 @@ defmodule Proxy.Connection.Authentication do
   def authenticate(%Proxy.Connection.Context{
     client_socket: client_socket
   } = context) do
-    with {_, packet} <- Networking.Protocol.Tcp.read_packet(client_socket),
+    with {_, _packet} <- Networking.Protocol.Tcp.read_packet(client_socket),
       :ok <- Networking.Protocol.Tcp.write_packet(client_socket, <<5, 0>>) do
       identify_connection(context)
     else
@@ -22,9 +22,6 @@ defmodule Proxy.Connection.Authentication do
     end
   end
 
-  @doc """
-  Identifies the connection by reading the destination address from the client.
-  """
   @spec identify_connection(Proxy.Connection.Context.t()) :: {:ok, Proxy.Connection.Context.t()} | {:error, any()}
   defp identify_connection(%Proxy.Connection.Context{client_socket: client_socket} = context) do
     with {:ok, packet} <- Networking.Protocol.Tcp.read_packet(client_socket),
@@ -37,24 +34,18 @@ defmodule Proxy.Connection.Authentication do
     end
   end
 
-  @doc """
-  Parses the IP data from the client's packet.
-  """
   @spec parse_ip_data_from(binary(), :inet.socket()) :: {:ok, {integer(), binary(), integer()}} | {:error, any()}
   defp parse_ip_data_from(packet, client) do
     ip_data = Networking.Protocol.Socks.parse_destination({:ok, packet})
 
     case ip_data do
-      {type, ip, port} ->
+      {_, _, _} ->
         {:ok, ip_data}
       {:error, :invalid_address_type} ->
         destroy_client(client)
     end
   end
 
-  @doc """
-  Destroys the client connection.
-  """
   @spec destroy_client(:inet.socket()) :: :ok
   defp destroy_client(client) do
     :gen_tcp.close(client)

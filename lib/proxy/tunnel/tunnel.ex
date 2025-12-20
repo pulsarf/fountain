@@ -11,11 +11,16 @@ defmodule Proxy.Tunnel do
     context
   end
 
+  @spec delegate({:error, atom()}) :: {:error, atom()}
+  def delegate({:error, reason}) do
+    Logger.error "Error delegating tunnel: #{inspect(reason)}"
+
+    {:error, reason}
+  end
+
   @spec accept_client(:gen_tcp.socket(), {atom(), binary(), integer()}) :: {:ok, :gen_tcp.socket()}
   defp accept_client(client, {destination_type, ip_buffer, port}) do
     Logger.info "Accepting client connection"
-
-    ip = Networking.Protocol.IP.format_ip(ip_buffer)
 
     Networking.Protocol.Tcp.write_packet(
       client,
@@ -34,12 +39,5 @@ defmodule Proxy.Tunnel do
     end
 
     <<5, 0, 0>> <> destination_type_bin <> ip_buffer <> port_bin
-  end
-
-  @spec delegate({:error, atom()}) :: {:error, atom()}
-  def delegate({:error, reason}) do
-    Logger.error "Error delegating tunnel: #{inspect(reason)}"
-
-    {:error, reason}
   end
 end

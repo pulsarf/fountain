@@ -3,12 +3,9 @@ defmodule Proxy.Tunnel.Connection do
 
   import Bitwise
 
-  @doc """
-  Start a new tunnel connection by creating the end socket.
-  """
   @spec start(%Proxy.Connection.Context{}) :: {:ok, %Proxy.Connection.Context{}}
   def start(%Proxy.Connection.Context{
-    ip_address_data: {destination_type, ip_buffer, port}
+    ip_address_data: {_destination_type, ip_buffer, port}
   } = context) do
     ip = Networking.Protocol.IP.format_ip(ip_buffer)
 
@@ -26,19 +23,13 @@ defmodule Proxy.Tunnel.Connection do
     {:error, reason}
   end
 
-  @doc """
-  SOCKS5 packet modifier binding
-  """
   @spec tunnel_proxy(atom, binary) :: binary
-  defp tunnel_proxy(type, packet) do
+  defp tunnel_proxy(_type, packet) do
     packet
   end
 
   @tcp_so_buffer 1 <<< 18
 
-  @doc """
-  Create a new end socket for the tunnel connection.
-  """
   @spec create_end_socket(binary, integer) :: :gen_tcp.socket()
   defp create_end_socket(ip_buffer, port) do
     {:ok, socket} = :gen_tcp.connect(ip_buffer, port, [

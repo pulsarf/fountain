@@ -45,19 +45,13 @@ defmodule Networking.Protocol.Tcp do
     context
   end
 
-  @doc """
-  Error handling for pipe.
-  """
   @spec pipe({:error, atom()}) :: {:error, atom()}
-  def pipe({error, reason}) do
+  def pipe({_error, reason}) do
     Logger.error("Failed to pipe the socket from client to server: #{inspect(reason)}")
 
     {:error, reason}
   end
 
-  @doc """
-  Destroy every socket in a list.
-  """
   @spec destroy_sockets([:gen_tcp.socket()]) :: :ok | {:error, atom()}
   defp destroy_sockets(sockets) do
     Enum.each(sockets, fn socket ->
@@ -65,18 +59,13 @@ defmodule Networking.Protocol.Tcp do
     end)
   end
 
-  @doc """
-  Forward packets from one socket to another.
-  """
   @spec forward(:gen_tcp.socket(), :gen_tcp.socket(), Proxy.t(), :client | :server) :: :ok | {:error, atom()}
   defp forward(from, to, proxy, way) do
-    case read_packet(from) do
-      {:ok, packet} ->
-        write_packet(to, proxy.(way, packet))
-        forward(from, to, proxy, way)
-      {:error, reason} ->
-        destroy_sockets([to, from])
-        {:close}
+    with {:ok, packet} <- read_packet(from),
+      :ok <- write_packet(to, proxy.(way, packet)) do
+      forward(from, to, proxy, way)
+    else
+      {:error, _} -> destroy_sockets([to, from])
     end
   end
 end

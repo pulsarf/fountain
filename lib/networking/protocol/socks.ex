@@ -46,9 +46,6 @@ defmodule Networking.Protocol.Socks do
     end
   end
 
-  @doc """
-  Parse IPv4 address from SOCKS5 connection request.
-  """
   @spec parse_ipv4(binary) :: {atom, binary, integer}
   defp parse_ipv4(packet) when byte_size(packet) >= @min_ipv4_request_length do
     {
@@ -59,10 +56,8 @@ defmodule Networking.Protocol.Socks do
       )
     }
   end
+  defp parse_ipv4(_), do: {:error, :packet_too_short}
 
-  @doc """
-  Parse domain name from SOCKS5 connection request.
-  """
   @spec parse_nameserver(binary, integer) :: {atom, binary, integer}
   defp parse_nameserver(packet, domain_length) when byte_size(packet) >= @min_nameserver_request_length + domain_length do
     {
@@ -73,10 +68,8 @@ defmodule Networking.Protocol.Socks do
       @https_default_port
     }
   end
+  defp parse_nameserver(_, _), do: {:error, :packet_too_short}
 
-  @doc """
-  Parse IPv6 address from SOCKS5 connection request.
-  """
   @spec parse_ipv6(binary) :: {atom, binary, integer}
   defp parse_ipv6(packet) when byte_size(packet) >= @min_ipv6_request_length do
     {
@@ -87,8 +80,5 @@ defmodule Networking.Protocol.Socks do
       )
     }
   end
-
-  defp parse_ipv4(_), do: {:error, :packet_too_short}
   defp parse_ipv6(_), do: {:error, :packet_too_short}
-  defp parse_nameserver(_, _), do: {:error, :packet_too_short}
 end
