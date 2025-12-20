@@ -27,6 +27,10 @@ defmodule Networking.Protocol.Socks do
   @min_ipv6_request_length 22
   @min_nameserver_request_length 7
 
+  @doc """
+  Parse the server address from SOCKS5 connection request.
+  """
+  @spec parse_destination({:ok, binary()}) :: {:ok, {atom(), binary(), integer()}} | {:error, atom()}
   def parse_destination({:ok, packet}) when is_binary(packet) and byte_size(packet) > 5 do
     <<_::binary-size(3), destination_type, domain_length>> = binary_part(
       packet,
@@ -42,6 +46,10 @@ defmodule Networking.Protocol.Socks do
     end
   end
 
+  @doc """
+  Parse IPv4 address from SOCKS5 connection request.
+  """
+  @spec parse_ipv4(binary) :: {atom, binary, integer}
   defp parse_ipv4(packet) when byte_size(packet) >= @min_ipv4_request_length do
     {
       :ipv4,
@@ -52,6 +60,10 @@ defmodule Networking.Protocol.Socks do
     }
   end
 
+  @doc """
+  Parse domain name from SOCKS5 connection request.
+  """
+  @spec parse_nameserver(binary, integer) :: {atom, binary, integer}
   defp parse_nameserver(packet, domain_length) when byte_size(packet) >= @min_nameserver_request_length + domain_length do
     {
       :nameserver,
@@ -62,6 +74,10 @@ defmodule Networking.Protocol.Socks do
     }
   end
 
+  @doc """
+  Parse IPv6 address from SOCKS5 connection request.
+  """
+  @spec parse_ipv6(binary) :: {atom, binary, integer}
   defp parse_ipv6(packet) when byte_size(packet) >= @min_ipv6_request_length do
     {
       :ipv6,
