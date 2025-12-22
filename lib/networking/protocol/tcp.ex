@@ -40,7 +40,7 @@ defmodule Networking.Protocol.Tcp do
       fn -> forward(socket, client, proxy, :server) end
     ]
 
-    Utilities.Concurrent.race_tasks(tasks)
+    Networking.Shared.Concurrent.race_tasks(tasks)
 
     context
   end

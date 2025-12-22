@@ -1,4 +1,4 @@
-defmodule Utilities.Binary do
+defmodule Networking.Shared.Binary do
   import Bitwise
 
   def read_u16([head | tail]) when is_integer(head) do

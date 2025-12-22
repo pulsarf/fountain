@@ -1,4 +1,4 @@
-defmodule Utilities.Concurrent do
+defmodule Networking.Shared.Concurrent do
   @doc """
   Concurrency utilities
   """

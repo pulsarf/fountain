@@ -51,7 +51,7 @@ defmodule Networking.Protocol.Socks do
     {
       :ipv4,
       binary_part(packet, @ip_address_start, @ipv4_length),
-      Utilities.Binary.read_u16(
+      Networking.Shared.Binary.read_u16(
         binary_part(packet, @ipv4_port_start, @port_length)
       )
     }
@@ -75,7 +75,7 @@ defmodule Networking.Protocol.Socks do
     {
       :ipv6,
       binary_part(packet, @ip_address_start, @ipv6_length),
-      Utilities.Binary.read_u16(
+      Networking.Shared.Binary.read_u16(
         binary_part(packet, @ipv6_port_start, @port_length)
       )
     }
