@@ -1,4 +1,6 @@
 defmodule Proxy.Connection.Handler do
+  require Logger
+
   @doc """
   Handles the socks5 protocol flow
   """
@@ -6,11 +8,15 @@ defmodule Proxy.Connection.Handler do
   def handle_client(client) do
     context = %Proxy.Connection.Context{client_socket: client}
 
-    context
-      |> authenticate()
-      |> delegate()
-      |> start_connection()
-      |> start_pipe()
+    try do
+      context
+        |> authenticate()
+        |> delegate()
+        |> start_connection()
+        |> start_pipe()
+    rescue
+      e -> Logger.info("Error handling client: #{inspect(e)}")
+    end
   end
 
   @spec authenticate(Proxy.Connection.Context.t()) :: {:ok, Proxy.Connection.Context.t()} | {:error, any()}
